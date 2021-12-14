@@ -6,7 +6,7 @@
             "id": "3302ff7e-eca5-4f9b-bf86-2c7145d600bb",
             "actions": [
                 {
-                    "name": "Jump",
+                    "name": "JumpPress",
                     "type": "Button",
                     "id": "942e05f4-ef68-43f8-8752-33bb6ff40fdf",
                     "expectedControlType": "Button",
@@ -15,7 +15,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Tongue",
+                    "name": "TonguePress",
                     "type": "Button",
                     "id": "24645515-2994-47ca-9ca9-6b2279e63fcf",
                     "expectedControlType": "Button",
@@ -24,28 +24,37 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "DirectionalJump",
-                    "type": "PassThrough",
-                    "id": "6f5b0d0f-1b0b-4cad-ade3-3c3c368809ba",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "DirectionalTongue",
-                    "type": "PassThrough",
-                    "id": "168389ba-e2c3-4ca2-963b-c035661e31c5",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Direction",
                     "type": "PassThrough",
                     "id": "dcc3db60-7ea6-42d9-8244-09a6dda8856e",
-                    "expectedControlType": "",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "JumpRelease",
+                    "type": "Button",
+                    "id": "54a8374b-72e4-4b0b-a19b-087fb60ad1d4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "TongueRelease",
+                    "type": "Button",
+                    "id": "c931215e-0575-4016-9ad1-3bcb347965f6",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Position",
+                    "type": "PassThrough",
+                    "id": "9596b7b4-177f-4017-9f78-82873e5a5828",
+                    "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -54,56 +63,12 @@
             "bindings": [
                 {
                     "name": "",
-                    "id": "0709131a-3d06-4d89-8863-7f1746cf8d4c",
-                    "path": "<Touchscreen>/primaryTouch",
-                    "interactions": "Press(behavior=2)",
-                    "processors": "",
-                    "groups": "WendyMobile",
-                    "action": "DirectionalJump",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "decc262a-1eca-40ea-ab88-dd8b2a81ddb5",
-                    "path": "<Mouse>/leftButton",
-                    "interactions": "Press(behavior=2)",
-                    "processors": "",
-                    "groups": "WendyKeyboard",
-                    "action": "DirectionalJump",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "f4174fc5-409a-4a9a-874a-5fac17af4aee",
-                    "path": "<Touchscreen>/primaryTouch",
-                    "interactions": "Press(behavior=2)",
-                    "processors": "",
-                    "groups": "WendyMobile",
-                    "action": "DirectionalTongue",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "54ff3cbf-43f9-4e8e-a967-640961504dab",
-                    "path": "<Mouse>/leftButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "WendyKeyboard",
-                    "action": "DirectionalTongue",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "66356fd4-837d-4c9c-992a-f838bc09fe89",
                     "path": "<Gamepad>/buttonEast",
-                    "interactions": "Press(behavior=2)",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": "WendyController",
-                    "action": "Jump",
+                    "action": "JumpPress",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -111,10 +76,10 @@
                     "name": "",
                     "id": "cd2c276e-0bd7-490e-8a97-9016f18f0952",
                     "path": "<Gamepad>/buttonNorth",
-                    "interactions": "Press(behavior=2)",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": "WendyController",
-                    "action": "Jump",
+                    "action": "JumpPress",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -122,10 +87,10 @@
                     "name": "",
                     "id": "aa1e8681-2694-428e-8998-05dae9f2b5c1",
                     "path": "<Gamepad>/buttonSouth",
-                    "interactions": "Press(behavior=2)",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": "WendyController",
-                    "action": "Jump",
+                    "action": "JumpPress",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -133,10 +98,32 @@
                     "name": "",
                     "id": "aa1381dd-55f0-46e4-8e13-41528b0b2a44",
                     "path": "<Gamepad>/buttonWest",
-                    "interactions": "Press(behavior=2)",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": "WendyController",
-                    "action": "Jump",
+                    "action": "JumpPress",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "16a17b52-0d3b-4839-a47b-d248d2a82bdf",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "WendyKeyboard",
+                    "action": "JumpPress",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7282cac1-b637-4467-a523-ca1c064f5615",
+                    "path": "<Touchscreen>/Press",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "WendyMobile",
+                    "action": "JumpPress",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -144,10 +131,10 @@
                     "name": "",
                     "id": "519472ac-4256-44d5-a802-2e4abab1edaf",
                     "path": "<Gamepad>/buttonEast",
-                    "interactions": "Press(behavior=2)",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": "WendyController",
-                    "action": "Tongue",
+                    "action": "TonguePress",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -155,10 +142,10 @@
                     "name": "",
                     "id": "72fa15f5-0cee-4599-843a-81389a0b113f",
                     "path": "<Gamepad>/buttonNorth",
-                    "interactions": "Press(behavior=2)",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": "WendyController",
-                    "action": "Tongue",
+                    "action": "TonguePress",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -166,10 +153,10 @@
                     "name": "",
                     "id": "ffd33bd3-1474-4c4e-bb45-f69b178f6ada",
                     "path": "<Gamepad>/buttonSouth",
-                    "interactions": "Press(behavior=2)",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": "WendyController",
-                    "action": "Tongue",
+                    "action": "TonguePress",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -177,15 +164,15 @@
                     "name": "",
                     "id": "d948d7f2-25b6-4941-b80f-8796550010cc",
                     "path": "<Gamepad>/buttonWest",
-                    "interactions": "Press(behavior=2)",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": "WendyController",
-                    "action": "Tongue",
+                    "action": "TonguePress",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "2D Vector",
+                    "name": "Left Stick",
                     "id": "e02b3d0f-80c0-49f7-ae95-08849c41d60b",
                     "path": "2DVector",
                     "interactions": "",
@@ -238,6 +225,193 @@
                     "action": "Direction",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "1eb9b482-42de-4f1b-8f61-afe38d93c7ba",
+                    "path": "<Gamepad>/dpad",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "WendyController",
+                    "action": "Direction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2441b82b-1da2-4534-9340-4127c6e784d4",
+                    "path": "<Gamepad>/buttonWest",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "WendyController",
+                    "action": "JumpRelease",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9e905edb-230e-4360-a53d-7db616c5a65b",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "WendyController",
+                    "action": "JumpRelease",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dc85749d-df4c-4c72-b093-aebf8f9e7f5a",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "WendyController",
+                    "action": "JumpRelease",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "33b614e3-0e09-4635-a7ac-46b30cd1bf78",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "WendyController",
+                    "action": "JumpRelease",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0e508966-7e14-4a71-8e09-fe7805ae51a7",
+                    "path": "<Gamepad>/buttonWest",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "WendyController",
+                    "action": "TongueRelease",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "90a18bb0-3072-4709-aa8e-4f6611374965",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "WendyController",
+                    "action": "TongueRelease",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f9355417-7495-45ca-a091-23c1fb86e852",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "WendyController",
+                    "action": "TongueRelease",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e34f9faf-c6e7-40f1-b346-11ba1ee0b058",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "WendyController",
+                    "action": "TongueRelease",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8172ff37-39e6-49f2-8096-f06ed2190c17",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "WendyKeyboard",
+                    "action": "Position",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "155e90fc-c2d0-4198-a854-b18a6d4873f4",
+                    "path": "<Touchscreen>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "WendyMobile",
+                    "action": "Position",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ab20d97f-6978-4669-aef2-379716c12041",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "WendyKeyboard",
+                    "action": "TonguePress",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "20c6a4ca-51b8-4cb1-b24d-1e9f24ab9d64",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "WendyKeyboard",
+                    "action": "JumpRelease",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "241b43b1-6912-40e0-888d-a2ec2e8acc17",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "WendyKeyboard",
+                    "action": "TongueRelease",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a2521070-1808-4777-9029-a867d1f7a0dd",
+                    "path": "<Touchscreen>/Press",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "WendyMobile",
+                    "action": "TonguePress",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "eaa58d34-3c18-45c0-acf5-f40ddc81cdef",
+                    "path": "<Touchscreen>/Press",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "WendyMobile",
+                    "action": "JumpRelease",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ac2229d6-bb0a-47f8-b2c0-f8723e3c2e12",
+                    "path": "<Touchscreen>/Press",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "WendyMobile",
+                    "action": "TongueRelease",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }
