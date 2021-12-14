@@ -17,7 +17,7 @@ public class CharacterController : MonoBehaviour
     private TongueState m_CurrentTongueState;
     private bool m_IsGrounded;
     
-    void Awake()
+    private void Awake()
     {
         m_Collider = GetComponent<BoxCollider2D>();
         m_Rigidbody = GetComponent<Rigidbody2D>();
@@ -25,13 +25,13 @@ public class CharacterController : MonoBehaviour
         m_CurrentTongueState = TongueState.Idle;
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         var Ray = Physics2D.Raycast(transform.position, Vector2.down, 0.01f);
         m_IsGrounded = Ray != null && Ray.collider != null;
     }
 
-    void Update()
+    private void Update()
     {
         switch (m_CurrentState)
         {
@@ -101,10 +101,34 @@ public class CharacterController : MonoBehaviour
         }
     }
 
-    void ChargeJumpPower()
+    private void ChargeJumpPower()
     {
         m_JumpPowerCharge += m_JumpPowerChargeRate*Time.deltaTime;
         m_JumpPowerCharge = Mathf.Clamp(m_JumpPowerCharge, 0, m_MaxJumpPowerCharge);
+    }
+
+    public void SetJumpState(bool bIsJumping)
+    {
+        // Called when a jump input is pressed or released (bIsJumping)
+        // Can currently be triggered from any gamepad button, left clicking and touching the screen
+    }
+
+    public void SetTongueState(bool bIsTonguing)
+    {
+        // Called when a tongue input is pressed or released (bIsJumping)
+        // Can currently be triggered from any gamepad button, left clicking and touching the screen
+    }
+
+    public void SetInputDirection(Vector2 Direction)
+    {
+        // Called when a direction is input
+        // Can currently be triggered from the gamepad's left stick and D-pad
+    }
+
+    public void SetCursorPosition(Vector2 Position)
+    {
+        // Called when a pointer sets a position
+        // Can currently be triggered by moving the left mouse or by touching the screen
     }
 
     bool Pressed()

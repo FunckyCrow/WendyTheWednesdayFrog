@@ -42,7 +42,10 @@ public class TongueComponent : MonoBehaviour
         
         tongueCollider = GetComponent<Collider2D>();
         if (!tongueCollider) Debug.LogError("TongueComponent - No Sprite Renderer found");
-        
+    }
+
+    private void Start()
+    {
         // Hide the tongue on game start
         DeactivateTongue();
 
