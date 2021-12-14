@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class TongueComponent : MonoBehaviour
@@ -12,18 +13,14 @@ public class TongueComponent : MonoBehaviour
     [Tooltip("The maximum range the tongue can reach")]
     [SerializeField] 
     private float maxTongueRange;
-
+    
     [Tooltip("The maximum speed the tongue can reach")] 
     [SerializeField]
-    private float maxTongueSpeed;
-    
-    [Tooltip("What value the tongue adds to its speed every update. Also works for pull/retracting the tongue")]
-    [SerializeField] 
-    private float tongueAcceleration;
-    
-    [Tooltip("At what range the tongue stops accelerating and starts decelerating instead.")]
+    private float initialTongueSpeed;
+
+    [Tooltip("The force at which the tongue starts decelerating.")]
     [SerializeField]
-    private float tongueAccelerationThreshold;
+    private float tongueDeceleration;
 
     private SpriteRenderer tongueSpriteRenderer;
     private Collider2D tongueCollider;
@@ -31,7 +28,7 @@ public class TongueComponent : MonoBehaviour
     private Vector2 minimumSpriteDimensions = new Vector2(0.5f, 0.5f);
     private float currentTongueRange = 0.0f;
     private float currentTongueSpeed = 0.0f;
-    
+
     private bool bIsPushing = false;
     private bool bIsActive = false;
 
@@ -41,13 +38,13 @@ public class TongueComponent : MonoBehaviour
         if (!tongueSpriteRenderer) Debug.LogError("TongueComponent - No Sprite Renderer found");
         
         tongueCollider = GetComponent<Collider2D>();
-        if (!tongueCollider) Debug.LogError("TongueComponent - No Sprite Renderer found");
+        if (!tongueCollider) Debug.LogError("TongueComponent - No Collider found for the tongue");
     }
 
     private void Start()
     {
         // Hide the tongue on game start
-        DeactivateTongue();
+        //DeactivateTongue();
 
         PushTongue();
     }
@@ -58,37 +55,26 @@ public class TongueComponent : MonoBehaviour
         {
             if (bIsPushing)
             {
-                // Add acceleration
-                if (currentTongueRange < tongueAccelerationThreshold)
-                {
-                    currentTongueSpeed = Mathf.Max(maxTongueSpeed, currentTongueSpeed + tongueAcceleration);
-                }
-
-                // Calculate tongue range with clamping
-                currentTongueRange += Mathf.Max(maxTongueRange, currentTongueRange + currentTongueSpeed);
-
-                // If fully extended, switch to pulling
+                Debug.Log("We push!");
                 if (currentTongueRange >= maxTongueRange)
                 {
-                    currentTongueSpeed = 0.0f;
-                    bIsPushing = false;
+                    Debug.Log("Switch to Pull Tongue!");
+                    PullTongue();
                 }
             }
-            
-            // Is pulling
             else
             {
-                // Decelerate the tongue
-                currentTongueSpeed = Mathf.Max(maxTongueSpeed, currentTongueSpeed + tongueAcceleration);
-                
-                currentTongueRange = Mathf.Max(0.0f, currentTongueRange - currentTongueSpeed);
+                Debug.Log("We pull!");
+                currentTongueSpeed = Mathf.Max(-initialTongueSpeed, currentTongueSpeed - (tongueDeceleration * Time.deltaTime));
 
-                if (currentTongueRange < minimumSpriteDimensions.x)
+                if (currentTongueRange <= minimumSpriteDimensions.x / 2)
                 {
-                    
+                    Debug.Log("We Deactivate the Tongue!");
+                    DeactivateTongue();   
                 }
             }
             
+            currentTongueRange += (currentTongueSpeed * Time.deltaTime);
             UpdateTongueStretch();
         }
     }
@@ -96,15 +82,23 @@ public class TongueComponent : MonoBehaviour
     public void PushTongue()
     {
         // Show tongue
-        tongueSpriteRenderer.enabled = false;
-        tongueCollider.enabled = false;
+        ActivateTongue();
         
+        currentTongueSpeed = initialTongueSpeed;
         bIsPushing = true;
     }
 
     public void PullTongue()
     {
         bIsPushing = false;
+    }
+
+    public void ActivateTongue()
+    {
+        bIsActive = true;
+        
+        tongueSpriteRenderer.enabled = true;
+        tongueCollider.enabled = true;
     }
 
     public void DeactivateTongue()
@@ -122,12 +116,23 @@ public class TongueComponent : MonoBehaviour
 
     private void UpdateTongueStretch()
     {
-        if (tongueSpriteRenderer)
+        if (bIsActive)
         {
-            tongueSpriteRenderer.size = new Vector2(
-                Mathf.Max(currentTongueRange, minimumSpriteDimensions.x),
-                tongueSpriteRenderer.size.y
-            );
+            if (tongueSpriteRenderer)
+            {
+                tongueSpriteRenderer.size = new Vector2(
+                    Mathf.Max(currentTongueRange, minimumSpriteDimensions.x),
+                    tongueSpriteRenderer.size.y
+                );
+            }
+
+            if (tongueCollider)
+            {
+                tongueCollider.offset = new Vector2(
+                    tongueSpriteRenderer.size.x - minimumSpriteDimensions.x/2,
+                    tongueCollider.offset.y
+                );
+            }
         }
     }
 
