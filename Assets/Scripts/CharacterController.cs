@@ -5,30 +5,38 @@ using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
+    private Rigidbody2D m_Rigidbody;
+    private Collider2D m_Collider;
+    private Animator m_Animator;
+
     [SerializeField] private Vector2 m_JumpDirection;
     [SerializeField] private float m_MinJumpPowerCharge;
     [SerializeField] private float m_MaxJumpPowerCharge;
     [SerializeField] private float m_JumpPowerChargeRate;
     private float m_JumpPowerCharge;
     
-    private Rigidbody2D m_Rigidbody;
-    private Collider2D m_Collider;
     private State m_CurrentState;
     private TongueState m_CurrentTongueState;
-    private bool m_IsGrounded;
     
+    private bool m_IsJumpButtonPressed = false;
+    private bool m_IsTongueButtonPressed;
+    private bool m_IsGrounded;
+
     private void Awake()
     {
-        m_Collider = GetComponent<BoxCollider2D>();
+        m_Collider  = GetComponent<BoxCollider2D>();
         m_Rigidbody = GetComponent<Rigidbody2D>();
+        m_Animator  = GetComponentInChildren<Animator>();
+        
         m_CurrentState = State.Idle;
         m_CurrentTongueState = TongueState.Idle;
+        m_Animator.SetBool("Idle", true);
     }
 
     private void FixedUpdate()
     {
-        var Ray = Physics2D.Raycast(transform.position, Vector2.down, 0.01f);
-        m_IsGrounded = Ray != null && Ray.collider != null;
+        var Ray = Physics2D.Raycast(transform.position + Vector3.down * 0.01f, Vector2.down, 0.05f);
+        m_IsGrounded = Ray != null && Ray.collider != null && Ray.collider != m_Collider && m_Rigidbody.velocity.y <= 0;
     }
 
     private void Update()
@@ -39,35 +47,40 @@ public class CharacterController : MonoBehaviour
                 if (Pressed())
                 {
                     m_CurrentState = State.Charging;
+                    m_Animator.SetBool("Idle", false);
+                    m_Animator.SetBool("Charging", true);
+                    
                     m_JumpPowerCharge = m_MinJumpPowerCharge;
                 }
                 break;
+            
             case State.Charging:
                 if (Pressing())
                 {
                     ChargeJumpPower();
                 }
-                else if (Released())
+                else
                 {
+                    m_CurrentState = State.Jumping;
+                    m_Animator.SetBool("Jumping", true);
+                    m_Animator.SetBool("Charging", false);
+                    
                     Vector2 JumpVector = m_JumpDirection;
                     JumpVector.Normalize();
                     JumpVector *= m_JumpPowerCharge;
                     m_JumpPowerCharge = 0;
                     m_Rigidbody.AddForce(JumpVector, ForceMode2D.Impulse);
-                    Debug.Log(JumpVector);
-                    m_CurrentState = State.Jumping;
+                    m_IsGrounded = false;
                 }
+                
                 break;
+            
             case State.Jumping:
                 if (Pressed())
                 {
                     m_CurrentTongueState = TongueState.Extending;
                 }
-                else if (Pressing())
-                {
-                    
-                }
-                else if (Released())
+                else if (!Pressing() && m_CurrentTongueState == TongueState.Extending)
                 {
                     m_CurrentTongueState = TongueState.Retracting;
                 }
@@ -75,28 +88,30 @@ public class CharacterController : MonoBehaviour
                 if (m_IsGrounded)
                 {
                     m_CurrentState = State.Idle;
+                    m_Animator.SetBool("Idle", true);
+                    m_Animator.SetBool("Jumping", false);
+                    
                     m_CurrentTongueState = TongueState.Retracting;
                 }
-                
                 break;
+
             case State.Grabbing:
-                Debug.Log("Grabing");
                 break;
         }
 
         switch (m_CurrentTongueState)
         {
             case TongueState.Idle:
-                Debug.Log("Tongue Idle");
+                //Debug.Log("Tongue Idle");
                 break;
             case TongueState.Extending:
-                Debug.Log("Tongue Extending");
+                //Debug.Log("Tongue Extending");
                 break;
             case TongueState.Retracting:
-                Debug.Log("Tongue Retracting");
+                //Debug.Log("Tongue Retracting");
                 break;
             case TongueState.Grabbing:
-                Debug.Log("Tongue Grabing");
+                //Debug.Log("Tongue Grabing");
                 break;
         }
     }
@@ -109,22 +124,16 @@ public class CharacterController : MonoBehaviour
 
     public void SetJumpState(bool bIsJumping)
     {
-        // Called when a jump input is pressed or released (bIsJumping)
-        // Can currently be triggered from any gamepad button, left clicking and touching the screen
+        Debug.Log("CLICK");
+        m_IsJumpButtonPressed = bIsJumping;
     }
-
     public void SetTongueState(bool bIsTonguing)
     {
-        // Called when a tongue input is pressed or released (bIsJumping)
-        // Can currently be triggered from any gamepad button, left clicking and touching the screen
+        m_IsTongueButtonPressed = bIsTonguing;
     }
-
     public void SetInputDirection(Vector2 Direction)
     {
-        // Called when a direction is input
-        // Can currently be triggered from the gamepad's left stick and D-pad
     }
-
     public void SetCursorPosition(Vector2 Position)
     {
         // Called when a pointer sets a position
