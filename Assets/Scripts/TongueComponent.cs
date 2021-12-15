@@ -3,16 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class TongueComponent : MonoBehaviour
 {
+    [Header("Tongue initial configuration")]
     [Tooltip("At what offset from Wendy's center the tongue spawns")]
     [SerializeField] 
     private Vector2 tongueOffset;
     
-    [Tooltip("The maximum range the tongue can reach")]
+    [Header("Tongue Push Properties")]
+    [FormerlySerializedAs("maxTongueRange")]
+    [Tooltip("The range at which the tongue starts dragging back")]
     [SerializeField] 
-    private float maxTongueRange;
+    private float tongueDecelerationRange;
     
     [Tooltip("The maximum speed the tongue can reach")] 
     [SerializeField]
@@ -22,15 +26,32 @@ public class TongueComponent : MonoBehaviour
     [SerializeField]
     private float tongueDeceleration;
 
+    [Header("Tongue Tether Properties")] 
+    [Tooltip("What force the tongue applies as a pull every frame")]
+    [SerializeField]
+    private float tongueTetherPullForce;
+    
+    [Tooltip("At what range the tongue drops the tether")]
+    [SerializeField]
+    private float tongueTetherDropRange;
+
     private SpriteRenderer tongueSpriteRenderer;
     private Collider2D tongueCollider;
+    private Rigidbody2D boundBody;
     
     private Vector2 minimumSpriteDimensions = new Vector2(0.5f, 0.5f);
     private float currentTongueRange = 0.0f;
     private float currentTongueSpeed = 0.0f;
 
+    /*
     private bool bIsPushing = false;
     private bool bIsActive = false;
+    private bool bTethered = false;
+    */
+
+    private TongueState tongueState;
+
+    public Action TongueTethered;
 
     private void Awake()
     {
@@ -51,32 +72,55 @@ public class TongueComponent : MonoBehaviour
 
     private void Update()
     {
-        if (bIsActive)
+        switch (tongueState)
         {
-            if (bIsPushing)
+            case TongueState.Pushing:
             {
-                Debug.Log("We push!");
-                if (currentTongueRange >= maxTongueRange)
+                if (currentTongueRange >= tongueDecelerationRange)
                 {
-                    Debug.Log("Switch to Pull Tongue!");
                     PullTongue();
                 }
-            }
-            else
-            {
-                Debug.Log("We pull!");
-                currentTongueSpeed = Mathf.Max(-initialTongueSpeed, currentTongueSpeed - (tongueDeceleration * Time.deltaTime));
 
+                currentTongueRange += (currentTongueSpeed * Time.deltaTime);
+                UpdateTongueStretch();
+                break;
+            }
+
+            case TongueState.Pulling:
+            {
+                currentTongueSpeed = Mathf.Max(-initialTongueSpeed, currentTongueSpeed - (tongueDeceleration * Time.deltaTime));
                 if (currentTongueRange <= minimumSpriteDimensions.x / 2)
                 {
-                    Debug.Log("We Deactivate the Tongue!");
-                    DeactivateTongue();   
+                    DeactivateTongue();
                 }
+
+                currentTongueRange += (currentTongueSpeed * Time.deltaTime);
+                UpdateTongueStretch();
+                break;
             }
-            
-            currentTongueRange += (currentTongueSpeed * Time.deltaTime);
-            UpdateTongueStretch();
+
+            case TongueState.Tethered:
+                if (currentTongueRange <= tongueTetherDropRange)
+                {
+                    tongueState = TongueState.Hidden;
+                }
+                else
+                {
+                    UpdateTongueTether();
+                }
+                break;
+            case TongueState.Hidden:
+                break;
+            default:
+                break;
         }
+    }
+
+    private void OnTriggerEnter(Collider otherCollider)
+    {
+        // We hit terrain! Switch to pull mode!
+        tongueState = TongueState.Tethered;
+        currentTongueSpeed = 0.0f;
     }
 
     public void PushTongue()
@@ -85,25 +129,23 @@ public class TongueComponent : MonoBehaviour
         ActivateTongue();
         
         currentTongueSpeed = initialTongueSpeed;
-        bIsPushing = true;
+        tongueState = TongueState.Pushing;
     }
 
     public void PullTongue()
     {
-        bIsPushing = false;
+        tongueState = TongueState.Pulling;
     }
 
     public void ActivateTongue()
     {
-        bIsActive = true;
-        
         tongueSpriteRenderer.enabled = true;
         tongueCollider.enabled = true;
     }
 
     public void DeactivateTongue()
     {
-        bIsActive = false;
+        tongueState = TongueState.Hidden;
         
         // Reinitialize physics variables
         currentTongueRange = 0.0f;
@@ -114,9 +156,14 @@ public class TongueComponent : MonoBehaviour
         tongueCollider.enabled = false;
     }
 
+    public void BindTongueToBody(Rigidbody2D bodyToBind)
+    {
+        boundBody = bodyToBind;
+    }
+
     private void UpdateTongueStretch()
     {
-        if (bIsActive)
+        if (tongueState != TongueState.Hidden)
         {
             if (tongueSpriteRenderer)
             {
@@ -136,4 +183,24 @@ public class TongueComponent : MonoBehaviour
         }
     }
 
+    private void UpdateTongueTether()
+    {
+        Vector2 tongueOrigin = tongueCollider.bounds.center;
+        Vector2 forceDirection = boundBody.position - tongueOrigin;
+        
+        boundBody.AddForce(forceDirection.normalized * tongueTetherPullForce * Time.deltaTime);
+        
+        // Calculate the tongue range so the collider stays at the same spot
+        currentTongueRange = Vector2.Distance(tongueOrigin, boundBody.position + tongueOffset);
+        
+        UpdateTongueStretch();
+    }
+}
+
+internal enum TongueState
+{
+    Pushing,
+    Pulling,
+    Tethered,
+    Hidden
 }
