@@ -37,13 +37,14 @@ public class CharacterController : MonoBehaviour
     private void Awake()
     {
         m_tongueComp = GetComponentInChildren<TongueComponent>();
-            
         m_Collider = GetComponent<BoxCollider2D>();
-
         m_Rigidbody = GetComponent<Rigidbody2D>();
+        
         m_Animator = GetComponentInChildren<Animator>();
         m_ParticleSystem = GetComponentInChildren<ParticleSystem>();
-
+        
+        if (m_tongueComp && m_Rigidbody) m_tongueComp.BindTongueToBody(m_Rigidbody);
+        
         m_CurrentState = State.Idle;
         m_currentAnimName = "Idle";
         
