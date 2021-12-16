@@ -10,6 +10,7 @@ public class CharacterController : MonoBehaviour
     private Collider2D m_GroundTrigger;
     private Animator m_Animator;
     private ParticleSystem m_ParticleSystem;
+    private TongueComponent m_tongueComp;
 
     [Header("Physics")]
     [SerializeField] LayerMask m_GeometryLayerMask;
@@ -20,7 +21,7 @@ public class CharacterController : MonoBehaviour
     [SerializeField] private float m_MaxJumpPowerCharge;
     [SerializeField] private float m_JumpPowerChargeRate;
     private float m_JumpPowerCharge;
-    
+
     private State m_CurrentState;
     private TongueState m_CurrentTongueState;
     
@@ -30,8 +31,13 @@ public class CharacterController : MonoBehaviour
 
     private string m_currentAnimName;
 
+    private Vector2 inputDirection;
+    private Vector2 cursorPosition;
+
     private void Awake()
     {
+        m_tongueComp = GetComponentInChildren<TongueComponent>();
+            
         m_Collider = GetComponent<BoxCollider2D>();
 
         m_Rigidbody = GetComponent<Rigidbody2D>();
@@ -45,6 +51,11 @@ public class CharacterController : MonoBehaviour
         m_Animator.SetBool("Idle", true);
     }
 
+    private void OnEnable()
+    {
+        m_tongueComp.TongueTethered += OnTongueTethered;
+    }
+    
     private void FixedUpdate()
     {
         m_IsGrounded = IsGrounded();
@@ -69,34 +80,20 @@ public class CharacterController : MonoBehaviour
             case State.Jumping:
                 if (m_IsGrounded)
                 {
-                    Debug.Log("Found grounded!");
                     SetCurrentState(State.Idle, "Idle");
-                    
-                    // Make tongue disappear
                     
                     m_ParticleSystem.Play();
                 }
                 break;
 
             case State.Grabbing:
-                break;
-        }
-
-        switch (m_CurrentTongueState)
-        {
-            case TongueState.Idle:
-                //Debug.Log("Tongue Idle");
-                m_Animator.SetBool("Grabing", false);
-                break;
-            case TongueState.Extending:
-                //Debug.Log("Tongue Extending");
-                m_Animator.SetBool("Grabing", true);
-                break;
-            case TongueState.Retracting:
-                //Debug.Log("Tongue Retracting");
-                break;
-            case TongueState.Grabbing:
-                //Debug.Log("Tongue Grabing");
+                if (m_IsGrounded)
+                {
+                    m_tongueComp.DeactivateTongue();
+                    SetCurrentState(State.Idle, "Idle");
+                    
+                    m_ParticleSystem.Play();
+                }
                 break;
         }
     }
@@ -138,23 +135,24 @@ public class CharacterController : MonoBehaviour
         {
             if (bIsTonguing)
             {
-                Debug.Log("Push tongue!");
+                SetCurrentState(State.Grabbing, "Grabbing");
+                m_tongueComp.PushTongue();
             }
 
             if (!bIsTonguing)
             {
-                Debug.Log("Pull tongue!");
+                m_tongueComp.PullTongue();
             }
         }
     }
     
     public void SetInputDirection(Vector2 Direction)
     {
+        inputDirection = Direction;
     }
     public void SetCursorPosition(Vector2 Position)
     {
-        // Called when a pointer sets a position
-        // Can currently be triggered by moving the left mouse or by touching the screen
+        cursorPosition = Position;
     }
 
     private bool IsGrounded()
@@ -172,6 +170,11 @@ public class CharacterController : MonoBehaviour
 
         m_CurrentState = newState;
         m_currentAnimName = animationName;
+    }
+    
+    private void OnTongueTethered()
+    {
+        Debug.Log("Got tongue tethered message!");
     }
 
     enum State
