@@ -32,23 +32,15 @@ public class CharacterController : MonoBehaviour
 
     private void Awake()
     {
-        var Coliders = GetComponents<BoxCollider2D>();
-        if (Coliders[1].isTrigger)
-        {
-            m_Collider = Coliders[0];
-            m_GroundTrigger = Coliders[1];
-        }
-        else
-        {
-            m_Collider = Coliders[1];
-            m_GroundTrigger = Coliders[0];
-        }
+        m_Collider = GetComponent<BoxCollider2D>();
 
         m_Rigidbody = GetComponent<Rigidbody2D>();
         m_Animator = GetComponentInChildren<Animator>();
         m_ParticleSystem = GetComponentInChildren<ParticleSystem>();
 
         m_CurrentState = State.Idle;
+        m_currentAnimName = "Idle";
+        
         m_CurrentTongueState = TongueState.Idle;
         m_Animator.SetBool("Idle", true);
     }
@@ -57,29 +49,7 @@ public class CharacterController : MonoBehaviour
     {
         m_IsGrounded = IsGrounded();
     }
-
-    // private void OnTriggerEnter2D(Collider other)
-    // {
-    //     if (m_Rigidbody.velocity.y <= 0)
-    //     {
-    //         m_IsGrounded = true;
-    //     }
-    // }
-
-    private void OnTriggerStay2D(Collider2D other)
-    {
-        List<Collider2D> Colliders = new List<Collider2D>();
-        m_GroundTrigger.GetContacts(Colliders);
-        if (Colliders.Count > 0)
-        {
-            m_IsGrounded = true;
-        }
-        else
-        {
-            m_IsGrounded = false;
-        }
-    }
-
+    
     private void Update()
     {
         switch (m_CurrentState)
@@ -87,58 +57,23 @@ public class CharacterController : MonoBehaviour
             case State.Idle:
                 if (!m_IsGrounded)
                 {
-                    m_CurrentState = State.Jumping;
-                }
-                else if (Pressed())
-                {
-                    m_CurrentState = State.Charging;
-                    m_Animator.SetBool("Idle", false);
-                    m_Animator.SetBool("Charging", true);
-                    
-                    m_JumpPowerCharge = m_MinJumpPowerCharge;
+                    // Idle and not grounded means we slid off or something
+                    SetCurrentState(State.Jumping, "Jumping");
                 }
                 break;
             
             case State.Charging:
-                if (Pressing())
-                {
-                    ChargeJumpPower();
-                }
-                else
-                {
-                    m_CurrentState = State.Jumping;
-                    m_Animator.SetBool("Jumping", true);
-                    m_Animator.SetBool("Charging", false);
-                    
-                    Vector2 JumpVector = m_JumpDirection;
-                    JumpVector.Normalize();
-                    JumpVector *= m_JumpPowerCharge;
-                    m_JumpPowerCharge = 0;
-                    m_Rigidbody.AddForce(JumpVector, ForceMode2D.Impulse);
-                    m_IsGrounded = false;
-                }
-                
+                ChargeJumpPower();
                 break;
             
             case State.Jumping:
-                if (Pressed())
-                {
-                    m_CurrentTongueState = TongueState.Extending;
-                    m_Animator.SetBool("Grabing", true);
-                }
-                else if (!Pressing() && m_CurrentTongueState == TongueState.Extending)
-                {
-                    m_Animator.SetBool("Grabing", false);
-                    m_CurrentTongueState = TongueState.Retracting;
-                }
-
                 if (m_IsGrounded)
                 {
-                    m_CurrentState = State.Idle;
-                    m_Animator.SetBool("Idle", true);
-                    m_Animator.SetBool("Jumping", false);
+                    Debug.Log("Found grounded!");
+                    SetCurrentState(State.Idle, "Idle");
                     
-                    m_CurrentTongueState = TongueState.Retracting;
+                    // Make tongue disappear
+                    
                     m_ParticleSystem.Play();
                 }
                 break;
@@ -176,14 +111,43 @@ public class CharacterController : MonoBehaviour
     {
         if (m_CurrentState == State.Idle && bIsJumping)
         {
-            
+            SetCurrentState(State.Charging, "Charging");
+
+            m_JumpPowerCharge = m_MinJumpPowerCharge;
         }
+        else if (m_CurrentState == State.Charging && !bIsJumping)
+        {
+            SetCurrentState(State.Jumping, "Jumping");
+
+            Vector2 JumpVector = m_JumpDirection;
+            JumpVector.Normalize();
+            JumpVector *= m_JumpPowerCharge;
+            
+            m_Rigidbody.AddForce(JumpVector, ForceMode2D.Impulse);
+            
+            m_JumpPowerCharge = 0;
+            m_IsGrounded = false;
+        }
+
         m_IsJumpButtonPressed = bIsJumping;
     }
+    
     public void SetTongueState(bool bIsTonguing)
     {
-        m_IsTongueButtonPressed = bIsTonguing;
+        if (m_CurrentState == State.Jumping)
+        {
+            if (bIsTonguing)
+            {
+                Debug.Log("Push tongue!");
+            }
+
+            if (!bIsTonguing)
+            {
+                Debug.Log("Pull tongue!");
+            }
+        }
     }
+    
     public void SetInputDirection(Vector2 Direction)
     {
     }
@@ -195,7 +159,7 @@ public class CharacterController : MonoBehaviour
 
     private bool IsGrounded()
     {
-        var Ray = Physics2D.BoxCast(m_Collider.bounds.center, m_Collider.bounds.size, 0f, Vector2.down,0.05f, m_GeometryLayerMask);
+        var Ray = Physics2D.BoxCast(m_Collider.bounds.center, m_Collider.bounds.size, 0f, Vector2.down,0.1f, m_GeometryLayerMask);
         bool isGrounded = Ray != null && Ray.collider != null && Ray.collider != m_Collider && m_Rigidbody.velocity.y <= 0;
 
         return isGrounded;
@@ -203,39 +167,13 @@ public class CharacterController : MonoBehaviour
 
     private void SetCurrentState(State newState, string animationName)
     {
-        
+        m_Animator.SetBool(m_currentAnimName, false);
+        m_Animator.SetBool(animationName, true);
+
+        m_CurrentState = newState;
+        m_currentAnimName = animationName;
     }
 
-    bool Pressed()
-    {
-#if UNITY_EDITOR
-        if (Input.GetMouseButtonDown(0)) return true;
-        else return false;
-#else
-        if (Input.GetTouch(0).phase == TouchPhase.Began) return true;
-        else return false;
-#endif
-    }
-    bool Pressing()
-    {
-#if UNITY_EDITOR
-        if (Input.GetMouseButton(0)) return true;
-        else return false;
-#else
-        if (Input.GetTouch(0).phase == TouchPhase.Stationary || Input.GetTouch(0).phase == TouchPhase.Moved) return true;
-        else return false;
-#endif
-    }
-    bool Released()
-    {
-#if UNITY_EDITOR
-        if (Input.GetMouseButtonUp(0)) return true;
-        else return false;
-#else
-        if (Input.GetTouch(0).phase == TouchPhase.Ended) return true;
-        else return false;
-#endif
-    }
     enum State
     {
         Idle,
