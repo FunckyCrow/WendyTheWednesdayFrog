@@ -7,7 +7,9 @@ public class CharacterController : MonoBehaviour
 {
     private Rigidbody2D m_Rigidbody;
     private Collider2D m_Collider;
+    private Collider2D m_GroundTrigger;
     private Animator m_Animator;
+    private ParticleSystem m_ParticleSystem;
 
     [SerializeField] private Vector2 m_JumpDirection;
     [SerializeField] private float m_MinJumpPowerCharge;
@@ -24,10 +26,22 @@ public class CharacterController : MonoBehaviour
 
     private void Awake()
     {
-        m_Collider  = GetComponent<BoxCollider2D>();
+        var Coliders = GetComponents<BoxCollider2D>();
+        if (Coliders[1].isTrigger)
+        {
+            m_Collider = Coliders[0];
+            m_GroundTrigger = Coliders[1];
+        }
+        else
+        {
+            m_Collider = Coliders[1];
+            m_GroundTrigger = Coliders[0];
+        }
+
         m_Rigidbody = GetComponent<Rigidbody2D>();
-        m_Animator  = GetComponentInChildren<Animator>();
-        
+        m_Animator = GetComponentInChildren<Animator>();
+        m_ParticleSystem = GetComponentInChildren<ParticleSystem>();
+
         m_CurrentState = State.Idle;
         m_CurrentTongueState = TongueState.Idle;
         m_Animator.SetBool("Idle", true);
@@ -35,8 +49,30 @@ public class CharacterController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        var Ray = Physics2D.Raycast(transform.position + Vector3.down * 0.01f, Vector2.down, 0.05f);
-        m_IsGrounded = Ray != null && Ray.collider != null && Ray.collider != m_Collider && m_Rigidbody.velocity.y <= 0;
+        //var Ray = Physics2D.Raycast(transform.position + Vector3.down * 0.01f, Vector2.down, 0.05f);
+        //m_IsGrounded = Ray != null && Ray.collider != null && Ray.collider != m_Collider && m_Rigidbody.velocity.y <= 0;
+    }
+
+    // private void OnTriggerEnter2D(Collider other)
+    // {
+    //     if (m_Rigidbody.velocity.y <= 0)
+    //     {
+    //         m_IsGrounded = true;
+    //     }
+    // }
+
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        List<Collider2D> Colliders = new List<Collider2D>();
+        m_GroundTrigger.GetContacts(Colliders);
+        if (Colliders.Count > 0)
+        {
+            m_IsGrounded = true;
+        }
+        else
+        {
+            m_IsGrounded = false;
+        }
     }
 
     private void Update()
@@ -79,9 +115,11 @@ public class CharacterController : MonoBehaviour
                 if (Pressed())
                 {
                     m_CurrentTongueState = TongueState.Extending;
+                    m_Animator.SetBool("Grabing", true);
                 }
                 else if (!Pressing() && m_CurrentTongueState == TongueState.Extending)
                 {
+                    m_Animator.SetBool("Grabing", false);
                     m_CurrentTongueState = TongueState.Retracting;
                 }
 
@@ -92,6 +130,7 @@ public class CharacterController : MonoBehaviour
                     m_Animator.SetBool("Jumping", false);
                     
                     m_CurrentTongueState = TongueState.Retracting;
+                    m_ParticleSystem.Play();
                 }
                 break;
 
@@ -103,9 +142,11 @@ public class CharacterController : MonoBehaviour
         {
             case TongueState.Idle:
                 //Debug.Log("Tongue Idle");
+                m_Animator.SetBool("Grabing", false);
                 break;
             case TongueState.Extending:
                 //Debug.Log("Tongue Extending");
+                m_Animator.SetBool("Grabing", true);
                 break;
             case TongueState.Retracting:
                 //Debug.Log("Tongue Retracting");
@@ -124,7 +165,6 @@ public class CharacterController : MonoBehaviour
 
     public void SetJumpState(bool bIsJumping)
     {
-        Debug.Log("CLICK");
         m_IsJumpButtonPressed = bIsJumping;
     }
     public void SetTongueState(bool bIsTonguing)
