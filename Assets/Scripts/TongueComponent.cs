@@ -65,9 +65,7 @@ public class TongueComponent : MonoBehaviour
     private void Start()
     {
         // Hide the tongue on game start
-        //DeactivateTongue();
-
-        PushTongue();
+        DeactivateTongue();
     }
 
     private void Update()

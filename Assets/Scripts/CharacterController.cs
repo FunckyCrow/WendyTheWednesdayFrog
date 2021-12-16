@@ -9,6 +9,10 @@ public class CharacterController : MonoBehaviour
     private Collider2D m_Collider;
     private Animator m_Animator;
 
+    [Header("Physics")]
+    [SerializeField] LayerMask m_GeometryLayerMask;
+    
+    [Header("Jump Config")]
     [SerializeField] private Vector2 m_JumpDirection;
     [SerializeField] private float m_MinJumpPowerCharge;
     [SerializeField] private float m_MaxJumpPowerCharge;
@@ -21,6 +25,8 @@ public class CharacterController : MonoBehaviour
     private bool m_IsJumpButtonPressed = false;
     private bool m_IsTongueButtonPressed;
     private bool m_IsGrounded;
+
+    private string m_currentAnimName;
 
     private void Awake()
     {
@@ -35,8 +41,7 @@ public class CharacterController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        var Ray = Physics2D.Raycast(transform.position + Vector3.down * 0.01f, Vector2.down, 0.05f);
-        m_IsGrounded = Ray != null && Ray.collider != null && Ray.collider != m_Collider && m_Rigidbody.velocity.y <= 0;
+        m_IsGrounded = IsGrounded();
     }
 
     private void Update()
@@ -44,7 +49,11 @@ public class CharacterController : MonoBehaviour
         switch (m_CurrentState)
         {
             case State.Idle:
-                if (Pressed())
+                if (!m_IsGrounded)
+                {
+                    m_CurrentState = State.Jumping;
+                }
+                else if (Pressed())
                 {
                     m_CurrentState = State.Charging;
                     m_Animator.SetBool("Idle", false);
@@ -124,7 +133,10 @@ public class CharacterController : MonoBehaviour
 
     public void SetJumpState(bool bIsJumping)
     {
-        Debug.Log("CLICK");
+        if (m_CurrentState == State.Idle && bIsJumping)
+        {
+            
+        }
         m_IsJumpButtonPressed = bIsJumping;
     }
     public void SetTongueState(bool bIsTonguing)
@@ -138,6 +150,19 @@ public class CharacterController : MonoBehaviour
     {
         // Called when a pointer sets a position
         // Can currently be triggered by moving the left mouse or by touching the screen
+    }
+
+    private bool IsGrounded()
+    {
+        var Ray = Physics2D.BoxCast(m_Collider.bounds.center, m_Collider.bounds.size, 0f, Vector2.down,0.05f, m_GeometryLayerMask);
+        bool isGrounded = Ray != null && Ray.collider != null && Ray.collider != m_Collider && m_Rigidbody.velocity.y <= 0;
+
+        return isGrounded;
+    }
+
+    private void SetCurrentState(State newState, string animationName)
+    {
+        
     }
 
     bool Pressed()
