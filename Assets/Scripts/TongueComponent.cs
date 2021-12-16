@@ -12,6 +12,10 @@ public class TongueComponent : MonoBehaviour
     [SerializeField] 
     private Vector2 tongueOffset;
     
+    [Tooltip("The sprite renderer for the base of the tongue")]
+    [SerializeField]
+    private SpriteRenderer tongueBaseSpriteRenderer;
+    
     [Header("Tongue Push Properties")]
     [FormerlySerializedAs("maxTongueRange")]
     [Tooltip("The range at which the tongue starts dragging back")]
@@ -35,13 +39,14 @@ public class TongueComponent : MonoBehaviour
     [SerializeField]
     private float tongueTetherDropRange;
 
+    private Transform tongueParent;
     private SpriteRenderer tongueSpriteRenderer;
     private Collider2D tongueCollider;
     private Rigidbody2D boundBody;
     
     private Vector2 minimumSpriteDimensions = new Vector2(0.5f, 0.5f);
-    private float currentTongueRange = 0.0f;
     private float currentTongueSpeed = 0.0f;
+    private float currentTongueRange;
 
     /*
     private bool bIsPushing = false;
@@ -55,8 +60,10 @@ public class TongueComponent : MonoBehaviour
 
     private void Awake()
     {
+        tongueParent = transform.parent;
         tongueSpriteRenderer = GetComponent<SpriteRenderer>();
         if (!tongueSpriteRenderer) Debug.LogError("TongueComponent - No Sprite Renderer found");
+        if (!tongueBaseSpriteRenderer) Debug.LogError("TongueComponent - No Sprite Renderer for tongue base found");
         
         tongueCollider = GetComponent<Collider2D>();
         if (!tongueCollider) Debug.LogError("TongueComponent - No Collider found for the tongue");
@@ -74,30 +81,37 @@ public class TongueComponent : MonoBehaviour
         {
             case TongueState.Pushing:
             {
+                currentTongueRange = Vector3.Distance(transform.position, boundBody.position);
                 if (currentTongueRange >= tongueDecelerationRange)
                 {
                     PullTongue();
                 }
 
-                currentTongueRange += (currentTongueSpeed * Time.deltaTime);
+                transform.localPosition += transform.right * (currentTongueSpeed * Time.deltaTime);
+                
                 UpdateTongueStretch();
                 break;
             }
 
             case TongueState.Pulling:
             {
+                currentTongueRange = Vector3.Distance(transform.position, boundBody.position);
+                
                 currentTongueSpeed = Mathf.Max(-initialTongueSpeed, currentTongueSpeed - (tongueDeceleration * Time.deltaTime));
                 if (currentTongueRange <= minimumSpriteDimensions.x / 2)
                 {
                     DeactivateTongue();
                 }
 
-                currentTongueRange += (currentTongueSpeed * Time.deltaTime);
+                transform.localPosition += transform.right * (currentTongueSpeed * Time.deltaTime);
+                
                 UpdateTongueStretch();
                 break;
             }
 
             case TongueState.Tethered:
+                currentTongueRange = Vector3.Distance(transform.position, boundBody.position);
+                
                 if (currentTongueRange <= tongueTetherDropRange)
                 {
                     tongueState = TongueState.Hidden;
@@ -107,36 +121,48 @@ public class TongueComponent : MonoBehaviour
                     UpdateTongueTether();
                 }
                 break;
+            
             case TongueState.Hidden:
                 break;
             default:
                 break;
         }
     }
-
-    private void OnTriggerEnter(Collider otherCollider)
+    
+    private void OnTriggerEnter2D(Collider2D otherCollider)
     {
-        // We hit terrain! Switch to pull mode!
-        tongueState = TongueState.Tethered;
-        currentTongueSpeed = 0.0f;
+        // We hit terrain! Tether!
+        TetherTongue();
     }
 
     public void PushTongue()
     {
         // Show tongue
         ActivateTongue();
-        
+
+        transform.localPosition = tongueOffset;
         currentTongueSpeed = initialTongueSpeed;
         tongueState = TongueState.Pushing;
     }
 
     public void PullTongue()
     {
-        tongueState = TongueState.Pulling;
+        if (tongueState == TongueState.Pushing)
+        {
+            tongueState = TongueState.Pulling;
+        }
+    }
+
+    public void TetherTongue()
+    {
+        transform.parent = null;
+        tongueState = TongueState.Tethered;
+        currentTongueSpeed = 0.0f;
     }
 
     public void ActivateTongue()
     {
+        transform.parent = tongueParent;
         tongueSpriteRenderer.enabled = true;
         tongueCollider.enabled = true;
     }
@@ -163,33 +189,26 @@ public class TongueComponent : MonoBehaviour
     {
         if (tongueState != TongueState.Hidden)
         {
+            /*
             if (tongueSpriteRenderer)
             {
                 tongueSpriteRenderer.size = new Vector2(
                     Mathf.Max(currentTongueRange, minimumSpriteDimensions.x),
                     tongueSpriteRenderer.size.y
                 );
-            }
-
-            if (tongueCollider)
-            {
-                tongueCollider.offset = new Vector2(
-                    tongueSpriteRenderer.size.x - minimumSpriteDimensions.x/2,
-                    tongueCollider.offset.y
-                );
-            }
+            }*/
         }
     }
 
     private void UpdateTongueTether()
     {
         Vector2 tongueOrigin = tongueCollider.bounds.center;
-        Vector2 forceDirection = boundBody.position - tongueOrigin;
+        Vector2 forceDirection = tongueOrigin - boundBody.position;
         
         boundBody.AddForce(forceDirection.normalized * tongueTetherPullForce * Time.deltaTime);
         
         // Calculate the tongue range so the collider stays at the same spot
-        currentTongueRange = Vector2.Distance(tongueOrigin, boundBody.position + tongueOffset);
+        currentTongueRange = Vector2.Distance(tongueOrigin, boundBody.position);
         
         UpdateTongueStretch();
     }
