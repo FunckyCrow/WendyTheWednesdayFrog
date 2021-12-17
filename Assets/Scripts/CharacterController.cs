@@ -36,6 +36,8 @@ public class CharacterController : MonoBehaviour
 
     private string m_currentAnimName;
 
+    private bool bUsingCursor = false;
+
     private Vector2 inputDirection;
     private Vector2 cursorPosition;
 
@@ -152,12 +154,12 @@ public class CharacterController : MonoBehaviour
                 SetCurrentState(State.Grabbing, "Grabbing");
                 Vector2 pushDirection = Vector2.right;
                 
-                if (cursorPosition != Vector2.zero)
+                if (bUsingCursor)
                 {
                     Debug.Log("Using cursor!");
                     pushDirection = Camera.main.ScreenToWorldPoint(cursorPosition) - transform.position;
                 }
-                else if(inputDirection != Vector2.zero)
+                else
                 {
                     Debug.Log("Using controller!");
                     pushDirection = inputDirection;
@@ -194,6 +196,11 @@ public class CharacterController : MonoBehaviour
     public void SetCursorPosition(Vector2 Position)
     {
         cursorPosition = Position;
+    }
+
+    public void SetUsingCursor(bool newUsingCursor)
+    {
+        bUsingCursor = newUsingCursor;
     }
 
     private bool IsGrounded()
