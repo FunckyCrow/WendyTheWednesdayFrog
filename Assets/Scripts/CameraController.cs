@@ -5,6 +5,7 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     [SerializeField] private GameObject Wendy;
+    [SerializeField] private Vector3 TrackingOffset;
     [SerializeField] private Vector2 MinCameraBounds;
     [SerializeField] private Vector2 MaxCameraBounds;
     
@@ -15,6 +16,8 @@ public class CameraController : MonoBehaviour
             Mathf.Clamp(Wendy.transform.position.y, MinCameraBounds.y, MaxCameraBounds.y),
             -10
         );
-        transform.position = Vector3.Lerp(transform.position, newPos, 0.35f);
+
+        newPos = newPos + TrackingOffset;
+        transform.position = Vector3.Lerp(transform.position, newPos, 0.0085f);
     }
 }
