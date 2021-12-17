@@ -139,6 +139,8 @@ public class TongueComponent : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D otherCollider)
     {
         // We hit terrain! Tether!
+        boundBody.velocity = Vector2.zero;
+        boundBody.gravityScale = 1;
         TetherTongue();
     }
 
@@ -184,6 +186,7 @@ public class TongueComponent : MonoBehaviour
     public void DeactivateTongue()
     {
         tongueState = TongueState.Hidden;
+        boundBody.gravityScale = 3;
         
         // Reinitialize physics variables
         currentTongueRange = 0.0f;
