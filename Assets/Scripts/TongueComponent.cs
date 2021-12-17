@@ -139,7 +139,7 @@ public class TongueComponent : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D otherCollider)
     {
         // We hit terrain! Tether!
-        boundBody.velocity = Vector2.zero;
+        //boundBody.velocity = Vector2.zero;
         boundBody.gravityScale = 1;
         TetherTongue();
     }
