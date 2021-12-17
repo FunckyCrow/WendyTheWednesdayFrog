@@ -543,6 +543,7 @@ MonoBehaviour:
     m_Bits: 0
   m_SpriteRenderer: {fileID: 0}
   m_TongueBase: {fileID: 0}
+  m_deathVfx: {fileID: 0}
   m_JumpDirection: {x: 1, y: 5}
   m_MinJumpPowerCharge: 5
   m_MaxJumpPowerCharge: 25
@@ -954,11 +955,11 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 3
   m_Material: {fileID: 0}
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!114 &794267709
 MonoBehaviour:
@@ -1019,6 +1020,7 @@ MonoBehaviour:
     m_Bits: 64
   m_SpriteRenderer: {fileID: 1608025444}
   m_TongueBase: {fileID: 1477240055}
+  m_deathVfx: {fileID: 0}
   m_JumpDirection: {x: 1, y: 5}
   m_MinJumpPowerCharge: 5
   m_MaxJumpPowerCharge: 25
@@ -1031,7 +1033,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 794267706}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 2.38, y: 0.81, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1608025442}
@@ -11541,11 +11543,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tongueOffset: {x: 0.3125, y: 0.1565}
   tongueBaseSpriteRenderer: {fileID: 1477240056}
-  tongueDecelerationRange: 4
-  initialTongueSpeed: 30
-  tongueDeceleration: 200
+  tongueDecelerationRange: 6
+  initialTongueSpeed: 35
+  tongueDeceleration: 150
   tongueTetherPullForce: 1200
-  tongueTetherDropRange: 2
+  tongueTetherDropRange: 0.5
 --- !u!1 &1741784484
 GameObject:
   m_ObjectHideFlags: 0
