@@ -6,18 +6,23 @@ using UnityEngine.InputSystem;
 
 public class WendyInputController : MonoBehaviour
 {
+    private PlayerInput playerInput;
     private WendyInputs wendyInputs;
     private CharacterController wendyController;
 
     private void Awake()
     {
         wendyInputs = new WendyInputs();
-
+        playerInput = GetComponent<PlayerInput>();
         wendyController = GetComponent<CharacterController>();
+        
+        ControlsChanged(playerInput);
     }
 
     private void OnEnable()
     {
+        playerInput.onControlsChanged += ControlsChanged;
+        
         wendyInputs.CharacterControls.JumpPress.Enable();
         wendyInputs.CharacterControls.JumpPress.performed += JumpPressed;
         
@@ -36,7 +41,19 @@ public class WendyInputController : MonoBehaviour
         wendyInputs.CharacterControls.Direction.Enable();
         wendyInputs.CharacterControls.Direction.performed += DirectionUpdated;
     }
-    
+
+    private void ControlsChanged(PlayerInput newInput)
+    {
+        if (newInput.currentControlScheme == "WendyController")
+        {
+            wendyController.SetUsingCursor(false);
+        }
+        else
+        {
+            wendyController.SetUsingCursor(true);
+        }
+    }
+
     private void OnDisable()
     {
         wendyInputs.CharacterControls.JumpPress.Disable();
