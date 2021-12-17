@@ -166,6 +166,11 @@ public class CharacterController : MonoBehaviour
                 m_tongueComp.PullTongue();
             }
         }
+
+        else if (m_CurrentState == State.Grabbing && bIsTonguing)
+        {
+            m_tongueComp.DeactivateTongue();
+        }
     }
     
     public void SetInputDirection(Vector2 Direction)
