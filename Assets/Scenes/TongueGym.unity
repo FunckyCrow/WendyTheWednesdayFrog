@@ -6670,5 +6670,29 @@ PrefabInstance:
       propertyPath: m_Name
       value: Flag
       objectReference: {fileID: 0}
+    - target: {fileID: 693356892884376063, guid: d21d73dfa13b37b42960c62c0c7fc0ce, type: 3}
+      propertyPath: m_Size.x
+      value: 0.71
+      objectReference: {fileID: 0}
+    - target: {fileID: 693356892884376063, guid: d21d73dfa13b37b42960c62c0c7fc0ce, type: 3}
+      propertyPath: m_Size.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 693356892884376063, guid: d21d73dfa13b37b42960c62c0c7fc0ce, type: 3}
+      propertyPath: m_Offset.x
+      value: 0.11
+      objectReference: {fileID: 0}
+    - target: {fileID: 5298607764895855792, guid: d21d73dfa13b37b42960c62c0c7fc0ce, type: 3}
+      propertyPath: m_Color.a
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5570041646643081525, guid: d21d73dfa13b37b42960c62c0c7fc0ce, type: 3}
+      propertyPath: m_Color.a
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5743529262430412821, guid: d21d73dfa13b37b42960c62c0c7fc0ce, type: 3}
+      propertyPath: m_Color.a
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d21d73dfa13b37b42960c62c0c7fc0ce, type: 3}
