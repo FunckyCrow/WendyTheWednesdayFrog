@@ -3,7 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Serialization;
+
+public delegate void TongueTetherEvent(bool bIsTethered);
+
+public delegate void TongueActiveEvent(bool bIsActive);
 
 public class TongueComponent : MonoBehaviour
 {
@@ -56,7 +61,8 @@ public class TongueComponent : MonoBehaviour
 
     private TongueState tongueState;
 
-    public Action TongueTethered;
+    public event TongueTetherEvent OnTongueTetherChanged;
+    public event TongueActiveEvent OnTongueActiveChanged;
 
     private void Awake()
     {
@@ -114,7 +120,8 @@ public class TongueComponent : MonoBehaviour
                 
                 if (currentTongueRange <= tongueTetherDropRange)
                 {
-                    tongueState = TongueState.Hidden;
+                    DeactivateTongue();
+                    OnTongueTetherChanged(false);
                 }
                 else
                 {
@@ -135,10 +142,12 @@ public class TongueComponent : MonoBehaviour
         TetherTongue();
     }
 
-    public void PushTongue()
+    public void PushTongue(Vector2 pushDirection)
     {
         // Show tongue
         ActivateTongue();
+
+        transform.right = pushDirection;
 
         transform.localPosition = tongueOffset;
         currentTongueSpeed = initialTongueSpeed;
@@ -158,13 +167,18 @@ public class TongueComponent : MonoBehaviour
         transform.parent = null;
         tongueState = TongueState.Tethered;
         currentTongueSpeed = 0.0f;
+
+        OnTongueTetherChanged(true);
     }
 
     public void ActivateTongue()
     {
         transform.parent = tongueParent;
         tongueSpriteRenderer.enabled = true;
+        tongueBaseSpriteRenderer.enabled = true;
         tongueCollider.enabled = true;
+
+        OnTongueActiveChanged(true);
     }
 
     public void DeactivateTongue()
@@ -177,7 +191,10 @@ public class TongueComponent : MonoBehaviour
         
         // Hide tongue
         tongueSpriteRenderer.enabled = false;
+        tongueBaseSpriteRenderer.enabled = false;
         tongueCollider.enabled = false;
+
+        OnTongueActiveChanged(false);
     }
 
     public void BindTongueToBody(Rigidbody2D bodyToBind)
@@ -189,14 +206,13 @@ public class TongueComponent : MonoBehaviour
     {
         if (tongueState != TongueState.Hidden)
         {
-            /*
-            if (tongueSpriteRenderer)
+            if (tongueBaseSpriteRenderer)
             {
-                tongueSpriteRenderer.size = new Vector2(
+                tongueBaseSpriteRenderer.size = new Vector2(
                     Mathf.Max(currentTongueRange, minimumSpriteDimensions.x),
                     tongueSpriteRenderer.size.y
                 );
-            }*/
+            }
         }
     }
 

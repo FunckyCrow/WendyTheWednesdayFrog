@@ -14,6 +14,10 @@ public class CharacterController : MonoBehaviour
 
     [Header("Physics")]
     [SerializeField] LayerMask m_GeometryLayerMask;
+
+    [Header("Visuals")] 
+    [SerializeField] private SpriteRenderer m_SpriteRenderer;
+    
     
     [Header("Jump Config")]
     [SerializeField] private Vector2 m_JumpDirection;
@@ -54,7 +58,8 @@ public class CharacterController : MonoBehaviour
 
     private void OnEnable()
     {
-        m_tongueComp.TongueTethered += OnTongueTethered;
+        m_tongueComp.OnTongueTetherChanged += OnTongueTetherChanged;
+        m_tongueComp.OnTongueActiveChanged += OnTongueActivechanged;
     }
     
     private void FixedUpdate()
@@ -90,10 +95,15 @@ public class CharacterController : MonoBehaviour
             case State.Grabbing:
                 if (m_IsGrounded)
                 {
+                    m_SpriteRenderer.transform.right = Vector3.right;
                     m_tongueComp.DeactivateTongue();
                     SetCurrentState(State.Idle, "Idle");
                     
                     m_ParticleSystem.Play();
+                }
+                else
+                {
+                    m_SpriteRenderer.transform.right = m_tongueComp.transform.position - transform.position;
                 }
                 break;
         }
@@ -137,7 +147,18 @@ public class CharacterController : MonoBehaviour
             if (bIsTonguing)
             {
                 SetCurrentState(State.Grabbing, "Grabbing");
-                m_tongueComp.PushTongue();
+                Vector2 pushDirection = Vector2.right;
+                
+                if (cursorPosition != Vector2.zero)
+                {
+                    pushDirection = transform.position - Camera.main.ScreenToWorldPoint(cursorPosition);
+                }
+                else if(inputDirection != Vector2.zero)
+                {
+                    pushDirection = inputDirection;
+                }
+
+                m_tongueComp.PushTongue(pushDirection);
             }
 
             if (!bIsTonguing)
@@ -173,9 +194,22 @@ public class CharacterController : MonoBehaviour
         m_currentAnimName = animationName;
     }
     
-    private void OnTongueTethered()
+    private void OnTongueTetherChanged(bool bIsTethered)
     {
-        Debug.Log("Got tongue tethered message!");
+        if (!bIsTethered && m_CurrentState == State.Grabbing)
+        {
+            m_SpriteRenderer.transform.right = Vector3.right;
+            SetCurrentState(State.Jumping, "Jumping");
+        }
+    }
+
+    private void OnTongueActivechanged(bool bIsActive)
+    {
+        if (!bIsActive && m_CurrentState == State.Grabbing)
+        {
+            m_SpriteRenderer.transform.right = Vector3.right;
+            SetCurrentState(State.Jumping, "Jumping");
+        }
     }
 
     enum State

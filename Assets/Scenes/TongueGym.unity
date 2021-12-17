@@ -643,7 +643,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1296118447}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.688, y: 0.1565, z: -1}
+  m_LocalPosition: {x: 0.688, y: 0.1565, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1678004756}
@@ -666,8 +666,8 @@ MonoBehaviour:
   tongueDecelerationRange: 4
   initialTongueSpeed: 30
   tongueDeceleration: 200
-  tongueTetherPullForce: 600
-  tongueTetherDropRange: 0.25
+  tongueTetherPullForce: 1200
+  tongueTetherDropRange: 2
 --- !u!212 &1296118450
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -896,6 +896,7 @@ MonoBehaviour:
   m_GeometryLayerMask:
     serializedVersion: 2
     m_Bits: 64
+  m_SpriteRenderer: {fileID: 548716414}
   m_JumpDirection: {x: 1, y: 5}
   m_MinJumpPowerCharge: 5
   m_MaxJumpPowerCharge: 25
