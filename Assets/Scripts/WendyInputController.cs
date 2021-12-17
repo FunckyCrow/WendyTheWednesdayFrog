@@ -93,7 +93,7 @@ public class WendyInputController : MonoBehaviour
     private void PositionUpdated(InputAction.CallbackContext ctx)
     {
         Vector2 inputPosition = ctx.ReadValue<Vector2>();
-        wendyController.SetCursorPosition(inputPosition.normalized);
+        wendyController.SetCursorPosition(inputPosition);
     }
     
     private void DirectionUpdated(InputAction.CallbackContext ctx)

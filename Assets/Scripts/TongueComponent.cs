@@ -87,7 +87,7 @@ public class TongueComponent : MonoBehaviour
         {
             case TongueState.Pushing:
             {
-                currentTongueRange = Vector3.Distance(transform.position, boundBody.position);
+                currentTongueRange = Vector3.Distance(transform.position, tongueBaseSpriteRenderer.transform.position);
                 if (currentTongueRange >= tongueDecelerationRange)
                 {
                     PullTongue();
@@ -101,8 +101,8 @@ public class TongueComponent : MonoBehaviour
 
             case TongueState.Pulling:
             {
-                currentTongueRange = Vector3.Distance(transform.position, boundBody.position);
-                
+                currentTongueRange = Vector3.Distance(transform.position, tongueBaseSpriteRenderer.transform.position);
+
                 currentTongueSpeed = Mathf.Max(-initialTongueSpeed, currentTongueSpeed - (tongueDeceleration * Time.deltaTime));
                 if (currentTongueRange <= minimumSpriteDimensions.x / 2)
                 {
@@ -116,7 +116,7 @@ public class TongueComponent : MonoBehaviour
             }
 
             case TongueState.Tethered:
-                currentTongueRange = Vector3.Distance(transform.position, boundBody.position);
+                currentTongueRange = Vector3.Distance(transform.position, tongueBaseSpriteRenderer.transform.position);
                 
                 if (currentTongueRange <= tongueTetherDropRange)
                 {
@@ -209,8 +209,8 @@ public class TongueComponent : MonoBehaviour
             if (tongueBaseSpriteRenderer)
             {
                 tongueBaseSpriteRenderer.size = new Vector2(
-                    Mathf.Max(currentTongueRange, minimumSpriteDimensions.x),
-                    tongueSpriteRenderer.size.y
+                    Mathf.Max(currentTongueRange - tongueSpriteRenderer.size.x/2, minimumSpriteDimensions.x),
+                    tongueBaseSpriteRenderer.size.y
                 );
             }
         }

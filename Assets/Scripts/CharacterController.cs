@@ -12,13 +12,12 @@ public class CharacterController : MonoBehaviour
     private ParticleSystem m_ParticleSystem;
     private TongueComponent m_tongueComp;
 
-    [Header("Physics")]
-    [SerializeField] LayerMask m_GeometryLayerMask;
+    [Header("Physics")] [SerializeField] LayerMask m_GeometryLayerMask;
 
     [Header("Visuals")] 
     [SerializeField] private SpriteRenderer m_SpriteRenderer;
-    
-    
+    [SerializeField] private Transform m_TongueBase;
+
     [Header("Jump Config")]
     [SerializeField] private Vector2 m_JumpDirection;
     [SerializeField] private float m_MinJumpPowerCharge;
@@ -103,7 +102,7 @@ public class CharacterController : MonoBehaviour
                 }
                 else
                 {
-                    m_SpriteRenderer.transform.right = m_tongueComp.transform.position - transform.position;
+                    m_SpriteRenderer.transform.right = m_tongueComp.transform.position - m_TongueBase.position;
                 }
                 break;
         }
@@ -151,13 +150,16 @@ public class CharacterController : MonoBehaviour
                 
                 if (cursorPosition != Vector2.zero)
                 {
-                    pushDirection = transform.position - Camera.main.ScreenToWorldPoint(cursorPosition);
+                    Debug.Log("Using cursor!");
+                    pushDirection = Camera.main.ScreenToWorldPoint(cursorPosition) - transform.position;
                 }
                 else if(inputDirection != Vector2.zero)
                 {
+                    Debug.Log("Using controller!");
                     pushDirection = inputDirection;
                 }
 
+                Debug.Log(pushDirection);
                 m_tongueComp.PushTongue(pushDirection);
             }
 
