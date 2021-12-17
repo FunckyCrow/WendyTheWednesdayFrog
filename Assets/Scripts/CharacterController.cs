@@ -86,6 +86,7 @@ public class CharacterController : MonoBehaviour
                 if (m_IsGrounded)
                 {
                     SetCurrentState(State.Idle, "Idle");
+                    m_Rigidbody.velocity = Vector2.zero; 
                     
                     m_ParticleSystem.Play();
                 }
@@ -97,6 +98,7 @@ public class CharacterController : MonoBehaviour
                     m_SpriteRenderer.transform.right = Vector3.right;
                     m_tongueComp.DeactivateTongue();
                     SetCurrentState(State.Idle, "Idle");
+                    m_Rigidbody.velocity = Vector2.zero; 
                     
                     m_ParticleSystem.Play();
                 }
@@ -186,8 +188,10 @@ public class CharacterController : MonoBehaviour
 
     private bool IsGrounded()
     {
-        var Ray = Physics2D.BoxCast(m_Collider.bounds.center, m_Collider.bounds.size, 0f, Vector2.down,0.1f, m_GeometryLayerMask);
-        bool isGrounded = Ray != null && Ray.collider != null && Ray.collider != m_Collider && m_Rigidbody.velocity.y <= 0;
+        var Cast = Physics2D.BoxCast(new Vector2(m_Collider.bounds.center.x, m_Collider.bounds.center.y - m_Collider.bounds.size.y/2),
+                                                new Vector2(m_Collider.bounds.size.x*0.9f, m_Collider.bounds.size.y/10), 
+                                                0f, Vector2.down,0.1f, m_GeometryLayerMask);
+        bool isGrounded = Cast != null && Cast.collider != null && Cast.collider != m_Collider && m_Rigidbody.velocity.y <= 0;
 
         return isGrounded;
     }
