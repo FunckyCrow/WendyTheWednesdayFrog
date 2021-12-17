@@ -12,11 +12,13 @@ public class CharacterController : MonoBehaviour
     private ParticleSystem m_ParticleSystem;
     private TongueComponent m_tongueComp;
 
-    [Header("Physics")] [SerializeField] LayerMask m_GeometryLayerMask;
+    [Header("Physics")] 
+    [SerializeField] LayerMask m_GeometryLayerMask;
 
     [Header("Visuals")] 
     [SerializeField] private SpriteRenderer m_SpriteRenderer;
     [SerializeField] private Transform m_TongueBase;
+    [SerializeField] private GameObject m_deathVfx;
 
     [Header("Jump Config")]
     [SerializeField] private Vector2 m_JumpDirection;
@@ -174,7 +176,15 @@ public class CharacterController : MonoBehaviour
             m_tongueComp.DeactivateTongue();
         }
     }
-    
+
+    public void Die()
+    {
+        Instantiate(m_deathVfx, transform.position, m_deathVfx.transform.rotation);
+
+        m_tongueComp.gameObject.SetActive(false);
+        gameObject.SetActive(false);
+    }
+
     public void SetInputDirection(Vector2 Direction)
     {
         inputDirection = Direction;

@@ -10,7 +10,7 @@ public class KillZone : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         CharacterController wendy = other.gameObject.GetComponent<CharacterController>();
-        //if (wendy) wendy.Die();
+        if (wendy) wendy.Die();
 
         StartCoroutine(DieCoroutine());
     }
