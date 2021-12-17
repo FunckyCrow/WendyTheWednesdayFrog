@@ -3,7 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Serialization;
+
+public delegate void TongueTetherEvent(bool bIsTethered);
+
+public delegate void TongueActiveEvent(bool bIsActive);
 
 public class TongueComponent : MonoBehaviour
 {
@@ -11,6 +16,10 @@ public class TongueComponent : MonoBehaviour
     [Tooltip("At what offset from Wendy's center the tongue spawns")]
     [SerializeField] 
     private Vector2 tongueOffset;
+    
+    [Tooltip("The sprite renderer for the base of the tongue")]
+    [SerializeField]
+    private SpriteRenderer tongueBaseSpriteRenderer;
     
     [Header("Tongue Push Properties")]
     [FormerlySerializedAs("maxTongueRange")]
@@ -35,13 +44,14 @@ public class TongueComponent : MonoBehaviour
     [SerializeField]
     private float tongueTetherDropRange;
 
+    private Transform tongueParent;
     private SpriteRenderer tongueSpriteRenderer;
     private Collider2D tongueCollider;
     private Rigidbody2D boundBody;
     
     private Vector2 minimumSpriteDimensions = new Vector2(0.5f, 0.5f);
-    private float currentTongueRange = 0.0f;
     private float currentTongueSpeed = 0.0f;
+    private float currentTongueRange;
 
     /*
     private bool bIsPushing = false;
@@ -51,12 +61,15 @@ public class TongueComponent : MonoBehaviour
 
     private TongueState tongueState;
 
-    public Action TongueTethered;
+    public event TongueTetherEvent OnTongueTetherChanged;
+    public event TongueActiveEvent OnTongueActiveChanged;
 
     private void Awake()
     {
+        tongueParent = transform.parent;
         tongueSpriteRenderer = GetComponent<SpriteRenderer>();
         if (!tongueSpriteRenderer) Debug.LogError("TongueComponent - No Sprite Renderer found");
+        if (!tongueBaseSpriteRenderer) Debug.LogError("TongueComponent - No Sprite Renderer for tongue base found");
         
         tongueCollider = GetComponent<Collider2D>();
         if (!tongueCollider) Debug.LogError("TongueComponent - No Collider found for the tongue");
@@ -74,71 +87,98 @@ public class TongueComponent : MonoBehaviour
         {
             case TongueState.Pushing:
             {
+                currentTongueRange = Vector3.Distance(transform.position, tongueBaseSpriteRenderer.transform.position);
                 if (currentTongueRange >= tongueDecelerationRange)
                 {
                     PullTongue();
                 }
 
-                currentTongueRange += (currentTongueSpeed * Time.deltaTime);
+                transform.localPosition += transform.right * (currentTongueSpeed * Time.deltaTime);
+                
                 UpdateTongueStretch();
                 break;
             }
 
             case TongueState.Pulling:
             {
+                currentTongueRange = Vector3.Distance(transform.position, tongueBaseSpriteRenderer.transform.position);
+
                 currentTongueSpeed = Mathf.Max(-initialTongueSpeed, currentTongueSpeed - (tongueDeceleration * Time.deltaTime));
                 if (currentTongueRange <= minimumSpriteDimensions.x / 2)
                 {
                     DeactivateTongue();
                 }
 
-                currentTongueRange += (currentTongueSpeed * Time.deltaTime);
+                transform.localPosition += transform.right * (currentTongueSpeed * Time.deltaTime);
+                
                 UpdateTongueStretch();
                 break;
             }
 
             case TongueState.Tethered:
+                currentTongueRange = Vector3.Distance(transform.position, tongueBaseSpriteRenderer.transform.position);
+                
                 if (currentTongueRange <= tongueTetherDropRange)
                 {
-                    tongueState = TongueState.Hidden;
+                    DeactivateTongue();
+                    OnTongueTetherChanged(false);
                 }
                 else
                 {
                     UpdateTongueTether();
                 }
                 break;
+            
             case TongueState.Hidden:
                 break;
             default:
                 break;
         }
     }
-
-    private void OnTriggerEnter(Collider otherCollider)
+    
+    private void OnTriggerEnter2D(Collider2D otherCollider)
     {
-        // We hit terrain! Switch to pull mode!
-        tongueState = TongueState.Tethered;
-        currentTongueSpeed = 0.0f;
+        // We hit terrain! Tether!
+        TetherTongue();
     }
 
-    public void PushTongue()
+    public void PushTongue(Vector2 pushDirection)
     {
         // Show tongue
         ActivateTongue();
-        
+
+        transform.right = pushDirection;
+
+        transform.localPosition = tongueOffset;
         currentTongueSpeed = initialTongueSpeed;
         tongueState = TongueState.Pushing;
     }
 
     public void PullTongue()
     {
-        tongueState = TongueState.Pulling;
+        if (tongueState == TongueState.Pushing)
+        {
+            tongueState = TongueState.Pulling;
+        }
+    }
+
+    public void TetherTongue()
+    {
+        transform.parent = null;
+        tongueState = TongueState.Tethered;
+        currentTongueSpeed = 0.0f;
+
+        OnTongueTetherChanged(true);
     }
 
     public void ActivateTongue()
     {
+        transform.parent = tongueParent;
         tongueSpriteRenderer.enabled = true;
+        tongueBaseSpriteRenderer.enabled = true;
         tongueCollider.enabled = true;
+
+        OnTongueActiveChanged(true);
     }
 
     public void DeactivateTongue()
@@ -151,7 +191,10 @@ public class TongueComponent : MonoBehaviour
         
         // Hide tongue
         tongueSpriteRenderer.enabled = false;
+        tongueBaseSpriteRenderer.enabled = false;
         tongueCollider.enabled = false;
+
+        OnTongueActiveChanged(false);
     }
 
     public void BindTongueToBody(Rigidbody2D bodyToBind)
@@ -163,19 +206,11 @@ public class TongueComponent : MonoBehaviour
     {
         if (tongueState != TongueState.Hidden)
         {
-            if (tongueSpriteRenderer)
+            if (tongueBaseSpriteRenderer)
             {
-                tongueSpriteRenderer.size = new Vector2(
-                    Mathf.Max(currentTongueRange, minimumSpriteDimensions.x),
-                    tongueSpriteRenderer.size.y
-                );
-            }
-
-            if (tongueCollider)
-            {
-                tongueCollider.offset = new Vector2(
-                    tongueSpriteRenderer.size.x - minimumSpriteDimensions.x/2,
-                    tongueCollider.offset.y
+                tongueBaseSpriteRenderer.size = new Vector2(
+                    Mathf.Max(currentTongueRange - tongueSpriteRenderer.size.x/2, minimumSpriteDimensions.x),
+                    tongueBaseSpriteRenderer.size.y
                 );
             }
         }
@@ -184,12 +219,12 @@ public class TongueComponent : MonoBehaviour
     private void UpdateTongueTether()
     {
         Vector2 tongueOrigin = tongueCollider.bounds.center;
-        Vector2 forceDirection = boundBody.position - tongueOrigin;
+        Vector2 forceDirection = tongueOrigin - boundBody.position;
         
         boundBody.AddForce(forceDirection.normalized * tongueTetherPullForce * Time.deltaTime);
         
         // Calculate the tongue range so the collider stays at the same spot
-        currentTongueRange = Vector2.Distance(tongueOrigin, boundBody.position + tongueOffset);
+        currentTongueRange = Vector2.Distance(tongueOrigin, boundBody.position);
         
         UpdateTongueStretch();
     }
