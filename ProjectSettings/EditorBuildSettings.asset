@@ -11,8 +11,11 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MainMenu.unity
     guid: f772b7f4aaf917f4e8f01409e525e35b
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TongueGym.unity
     guid: 41f93d8f5f74bf043952a2edcdc8b57e
+  - enabled: 1
+    path: Assets/Scenes/Level1.unity
+    guid: 658e016508adc6b4ab5ae02cd1f54ff9
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 4f5ba0f445787c84089cf91c02095374, type: 2}
