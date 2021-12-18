@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49c0da3c4b93c95409ea69c2af439869, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NextLevelName: TongueGym
+  NextLevelName: Level2
 --- !u!4 &31716058
 Transform:
   m_ObjectHideFlags: 0
